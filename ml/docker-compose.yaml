@@ -1,0 +1,19 @@
+# Stack Docker do modelo de ML, separada da stack do Airflow (docker-compose.yaml
+# na raiz) — concerns diferentes (Airflow orquestra a ELT; isto aqui só treina/avalia
+# os modelos MLP/KNN), Python/deps diferentes, e assim dá pra subir/derrubar uma sem mexer na outra.
+#
+# Uso (a partir desta pasta):
+#   docker compose up --build
+# Depois abra a URL com token que aparece no log (ex. http://localhost:8888/lab?token=...)
+# e rode mlp_activity_classification_academico.ipynb.
+services:
+  jupyter:
+    build:
+      context: ..
+      dockerfile: ml/Dockerfile
+    ports:
+      - "8888:8888"
+    volumes:
+      # Monta o repo inteiro (nao só ml/) porque a extracao le o .env da raiz do projeto.
+      - ..:/workspace
+    working_dir: /workspace/ml

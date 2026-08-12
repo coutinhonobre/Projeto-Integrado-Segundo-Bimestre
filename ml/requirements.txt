@@ -1,0 +1,17 @@
+# Ambiente Python separado do Airflow (requirements.txt na raiz), porque os
+# scripts deste diretorio rodam localmente (fora do container) ou no
+# container proprio definido em ml/Dockerfile, consultando a AWS diretamente.
+# Ver README para como criar o venv ou subir via `docker compose` (ml/docker-compose.yaml).
+boto3
+pandas
+pyarrow
+numpy
+scipy
+scikit-learn
+minisom
+matplotlib
+python-dotenv
+jupyterlab
+ipykernel
+nbclient
+seaborn
