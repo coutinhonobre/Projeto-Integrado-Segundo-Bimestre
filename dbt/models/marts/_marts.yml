@@ -1,0 +1,36 @@
+version: 2
+
+models:
+  - name: dim_subject
+    description: >
+      Uma linha por sujeito do WISDM, com contagem total de janelas validas,
+      numero de atividades distintas cobertas e pureza media de label. A
+      contagem de janelas por atividade individual vive no grao mais fino de
+      `gold_subject_activity_summary` (subject x activity).
+    columns:
+      - name: subject_id
+        description: Identificador do sujeito (ex. "1600").
+        data_tests:
+          - unique
+          - not_null
+
+  - name: fct_wisdm_windows
+    description: >
+      Tabela fato no grao de janela de sinal: features estatisticas
+      (acelerometro e giroscopio, 3 eixos cada) + label de atividade.
+      Consumida pelo modelo de Aprendizagem de Maquina (treino/avaliacao) e
+      pelo dashboard.
+    columns:
+      - name: window_uid
+        description: >
+          Chave substituta unica da janela (subject_id + activity_label +
+          window_id).
+        data_tests:
+          - unique
+          - not_null
+      - name: activity_label
+        description: Atividade majoritaria da janela.
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'O', 'P', 'Q', 'R', 'S']

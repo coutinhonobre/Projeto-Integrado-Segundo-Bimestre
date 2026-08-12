@@ -1,0 +1,84 @@
+<mxfile host="app.diagrams.net" agent="claude-code" version="24.0.0">
+  <diagram name="Arquitetura real (simplificada)" id="aws-arch-wisdm-simples">
+    <mxGraphModel dx="900" dy="600" grid="0" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1200" pageHeight="800" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+
+        <!-- Title -->
+        <mxCell id="title" value="Arquitetura real do pipeline WISDM — o que está implementado hoje" style="text;html=1;fontSize=18;fontStyle=1;fontColor=#232F3E;align=left;verticalAlign=middle;" vertex="1" parent="1">
+          <mxGeometry x="40" y="0" width="1000" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="subtitle" value="Orquestração e apresentação rodam localmente via Docker Compose (Airflow, Jupyter, Metabase); armazenamento, catálogo e consulta já são AWS real (S3, Glue Data Catalog, Athena — dbt roda em cima do Athena). A evolução para serviços 100% gerenciados é só uma nota ao final, não o foco deste diagrama." style="text;html=1;fontSize=12;fontStyle=2;fontColor=#767676;align=left;verticalAlign=middle;whiteSpace=wrap;" vertex="1" parent="1">
+          <mxGeometry x="40" y="34" width="1120" height="42" as="geometry" />
+        </mxCell>
+
+        <!-- External actor: Kaggle -->
+        <mxCell id="kaggle" value="Kaggle&#10;dataset WISDM" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#232F3E;fontColor=#232F3E;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="40" y="100" width="220" height="50" as="geometry" />
+        </mxCell>
+
+        <!-- Zone: Local Docker Compose -->
+        <mxCell id="localZone" value="Ambiente local — Docker Compose (hoje)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F5F5F5;strokeColor=#767676;dashed=1;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=10;fontColor=#767676;fontStyle=1;fontSize=13;container=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="180" width="280" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="airflowLocal" value="Airflow&#10;3 DAGs: ingestão → extração+dbt → gold" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#767676;dashed=1;fontColor=#232F3E;fontSize=11;arcSize=10;" vertex="1" parent="localZone">
+          <mxGeometry x="25" y="50" width="230" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="jupyterLocal" value="Jupyter — notebook MLP&#10;treina o modelo, publica resultados" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#767676;dashed=1;fontColor=#232F3E;fontSize=11;arcSize=10;" vertex="1" parent="localZone">
+          <mxGeometry x="25" y="200" width="230" height="100" as="geometry" />
+        </mxCell>
+        <mxCell id="metabaseLocal" value="Metabase — dashboard&#10;indicadores, gráficos, filtro" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#767676;dashed=1;fontColor=#232F3E;fontSize=11;arcSize=10;" vertex="1" parent="localZone">
+          <mxGeometry x="25" y="350" width="230" height="100" as="geometry" />
+        </mxCell>
+
+        <!-- Zone: AWS real -->
+        <mxCell id="awsZone" value="AWS — armazenamento, catálogo e consulta (real)" style="rounded=0;whiteSpace=wrap;html=1;fillColor=#F0F7EB;strokeColor=#1D8102;strokeWidth=2;verticalAlign=top;align=left;spacingLeft=10;fontColor=#1D8102;fontStyle=1;fontSize=13;container=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="180" width="380" height="500" as="geometry" />
+        </mxCell>
+        <mxCell id="s3" value="Amazon S3&#10;dados brutos e tratados" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#7AA116;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.s3;" vertex="1" parent="awsZone">
+          <mxGeometry x="160" y="55" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="glue" value="AWS Glue Data Catalog&#10;tabelas registradas" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.glue;" vertex="1" parent="awsZone">
+          <mxGeometry x="160" y="220" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="athena" value="Amazon Athena + dbt&#10;staging → marts → gold" style="sketch=0;outlineConnect=0;fontColor=#232F3E;gradientColor=none;fillColor=#8C4FFF;strokeColor=none;dashed=0;verticalLabelPosition=bottom;verticalAlign=top;align=center;html=1;fontSize=12;fontStyle=0;aspect=fixed;shape=mxgraph.aws4.resourceIcon;resIcon=mxgraph.aws4.athena;" vertex="1" parent="awsZone">
+          <mxGeometry x="160" y="385" width="60" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="s3ToGlue" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#1D8102;" edge="1" parent="awsZone" source="s3" target="glue">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="glueToAthena" value="" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=10;strokeColor=#1D8102;" edge="1" parent="awsZone" source="glue" target="athena">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- External actor: User -->
+        <mxCell id="user" value="Usuário / app de saúde-fitness&#10;(decisão apoiada pelo dashboard)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FFFFFF;strokeColor=#232F3E;fontColor=#232F3E;fontSize=12;arcSize=10;" vertex="1" parent="1">
+          <mxGeometry x="850" y="375" width="220" height="60" as="geometry" />
+        </mxCell>
+
+        <!-- Edges: fluxo principal -->
+        <mxCell id="e1" value="download" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=11;strokeColor=#232F3E;" edge="1" parent="1" source="kaggle" target="airflowLocal">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e2" value="grava raw + silver; roda dbt (staging → marts → gold)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=11;strokeColor=#232F3E;" edge="1" parent="1" source="airflowLocal" target="s3">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e3" value="treino do MLP: lê fct_wisdm_windows, publica ml_model_* na gold" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=11;strokeColor=#232F3E;startArrow=classic;startFill=1;" edge="1" parent="1" source="athena" target="jupyterLocal">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e4" value="lê camada gold (via Athena/Glue)" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=11;strokeColor=#232F3E;" edge="1" parent="1" source="athena" target="metabaseLocal">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+        <mxCell id="e5" value="dashboard" style="edgeStyle=orthogonalEdgeStyle;html=1;fontSize=11;strokeColor=#232F3E;" edge="1" parent="1" source="metabaseLocal" target="user">
+          <mxGeometry relative="1" as="geometry" />
+        </mxCell>
+
+        <!-- Future note -->
+        <mxCell id="futureNote" value="Evolução futura (proposta, não implementada): trocar o Docker Compose por serviços 100% gerenciados da AWS — Amazon MWAA (orquestração), SageMaker (treino do modelo, opcional) e ECS Fargate + RDS (dashboard). Detalhes e custos estimados em docs/relatorio.md." style="rounded=1;whiteSpace=wrap;html=1;fillColor=#FAFAFA;strokeColor=#AAAAAA;dashed=1;fontColor=#767676;fontSize=11;fontStyle=2;align=left;spacingLeft=10;arcSize=6;" vertex="1" parent="1">
+          <mxGeometry x="40" y="700" width="1030" height="60" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

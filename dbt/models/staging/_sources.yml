@@ -1,0 +1,18 @@
+version: 2
+
+sources:
+  - name: wisdm_raw
+    description: >
+      Tabela externa registrada pela DAG `wisdm_bronze_to_silver` no Glue
+      Data Catalog, apontando para os arquivos Parquet gravados na camada
+      Silver do S3 (`s3://$S3_BUCKET_NAME/$S3_SILVER_PREFIX/`), particionada
+      por `subject`.
+    schema: "{{ env_var('GLUE_DATABASE_NAME') }}"
+    tables:
+      - name: wisdm_features
+        description: >
+          Uma linha por janela de sinal (10s, sem sobreposicao - cada
+          amostra sincronizada pertence a uma unica janela) do device
+          `watch` do WISDM, com estatisticas (mean/std/min/max) de
+          acelerometro e giroscopio (3 eixos cada), e o label de atividade
+          majoritario da janela.

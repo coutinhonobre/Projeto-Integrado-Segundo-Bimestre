@@ -1,0 +1,6 @@
+kagglehub
+boto3
+pandas
+pyarrow
+dbt-core
+dbt-athena-community

@@ -1,0 +1,122 @@
+AWSTemplateFormatVersion: "2010-09-09"
+
+Description: >-
+  Infraestrutura AWS do pipeline WISDM (Projeto Integrado, IFG Pos-IA Modulo
+  2): bucket S3 da arquitetura medalhao (raw/silver/resultados Athena) e os
+  bancos Glue Data Catalog (silver e gold) usados pelo dbt via Athena.
+
+Parameters:
+  BucketName:
+    Type: String
+    Description: >-
+      Nome do bucket S3 (globalmente unico) usado pelas 3 camadas
+      (raw/silver/resultados Athena). Deve bater com S3_BUCKET_NAME no .env.
+    AllowedPattern: "^[a-z0-9][a-z0-9.-]{1,61}[a-z0-9]$"
+
+  RawPrefix:
+    Type: String
+    Default: raw/wisdm
+    Description: Prefixo da camada Bronze/raw (S3_RAW_PREFIX no .env).
+
+  SilverPrefix:
+    Type: String
+    Default: silver/wisdm_features
+    Description: Prefixo da camada Silver (S3_SILVER_PREFIX no .env).
+
+  AthenaResultsPrefix:
+    Type: String
+    Default: athena-results
+    Description: >-
+      Prefixo onde o Athena grava resultados/metadados de query
+      (ATHENA_RESULTS_PREFIX no .env).
+
+  AthenaResultsExpirationDays:
+    Type: Number
+    Default: 7
+    Description: >-
+      Dias ate expirar automaticamente os resultados de query do Athena -
+      custo de armazenamento recorrente e descartavel, ja que qualquer
+      resultado e reproduzivel rodando a query de novo.
+
+  SilverGlueDatabaseName:
+    Type: String
+    Default: projeto_integrado_wisdm_silver
+    Description: Banco Glue da camada Silver (GLUE_DATABASE_NAME no .env).
+
+  GoldGlueDatabaseName:
+    Type: String
+    Default: projeto_integrado_wisdm_gold
+    Description: Banco Glue da camada Gold (GOLD_GLUE_DATABASE_NAME no .env).
+
+Resources:
+  WisdmDataBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref BucketName
+      PublicAccessBlockConfiguration:
+        BlockPublicAcls: true
+        BlockPublicPolicy: true
+        IgnorePublicAcls: true
+        RestrictPublicBuckets: true
+      BucketEncryption:
+        ServerSideEncryptionConfiguration:
+          - ServerSideEncryptionByDefault:
+              SSEAlgorithm: AES256
+      LifecycleConfiguration:
+        Rules:
+          - Id: expire-athena-query-results
+            Status: Enabled
+            Prefix: !Sub "${AthenaResultsPrefix}/"
+            ExpirationInDays: !Ref AthenaResultsExpirationDays
+      Tags:
+        - Key: project
+          Value: projeto-integrado-wisdm
+
+  SilverGlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Ref SilverGlueDatabaseName
+        Description: >-
+          Camada Silver (medalhao): tabela externa wisdm_features
+          particionada por subject, criada/mantida pela DAG
+          wisdm_bronze_to_silver.
+
+  GoldGlueDatabase:
+    Type: AWS::Glue::Database
+    Properties:
+      CatalogId: !Ref AWS::AccountId
+      DatabaseInput:
+        Name: !Ref GoldGlueDatabaseName
+        Description: >-
+          Camada Gold (medalhao): gold_subject_activity_summary e
+          gold_activity_benchmark, materializados pelo dbt via DAG
+          wisdm_silver_to_gold.
+
+Outputs:
+  BucketName:
+    Description: Nome do bucket S3 criado - usar como S3_BUCKET_NAME no .env.
+    Value: !Ref WisdmDataBucket
+
+  RawLayerUri:
+    Description: URI S3 completa da camada Bronze/raw.
+    Value: !Sub "s3://${WisdmDataBucket}/${RawPrefix}/"
+
+  SilverLayerUri:
+    Description: URI S3 completa da camada Silver.
+    Value: !Sub "s3://${WisdmDataBucket}/${SilverPrefix}/"
+
+  AthenaResultsUri:
+    Description: URI S3 completa onde o Athena grava resultados de query.
+    Value: !Sub "s3://${WisdmDataBucket}/${AthenaResultsPrefix}/"
+
+  SilverGlueDatabaseName:
+    Description: >-
+      Banco Glue da camada Silver - usar como GLUE_DATABASE_NAME no .env.
+    Value: !Ref SilverGlueDatabase
+
+  GoldGlueDatabaseName:
+    Description: >-
+      Banco Glue da camada Gold - usar como GOLD_GLUE_DATABASE_NAME no .env.
+    Value: !Ref GoldGlueDatabase

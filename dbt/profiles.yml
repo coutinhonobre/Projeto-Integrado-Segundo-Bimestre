@@ -1,0 +1,11 @@
+projeto_integrado_wisdm_silver:
+  target: dev
+  outputs:
+    dev:
+      type: athena
+      s3_staging_dir: "s3://{{ env_var('S3_BUCKET_NAME') }}/{{ env_var('ATHENA_RESULTS_PREFIX', 'athena-results') }}/"
+      region_name: "{{ env_var('AWS_DEFAULT_REGION', 'us-east-1') }}"
+      database: awsdatacatalog
+      schema: "{{ env_var('GLUE_DATABASE_NAME') }}"
+      work_group: "{{ env_var('ATHENA_WORKGROUP', 'primary') }}"
+      threads: 2

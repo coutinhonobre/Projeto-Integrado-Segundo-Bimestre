@@ -1,0 +1,30 @@
+# credenciais / config local
+.env
+.env.*
+!.env.example
+
+# Airflow runtime
+airflow/logs/
+airflow/plugins/__pycache__/
+**/__pycache__/
+*.pyc
+
+# dbt runtime (artefatos gerados por `dbt run`/`dbt debug`, nao versionados)
+dbt/target/
+dbt/logs/
+dbt/dbt_packages/
+dbt/.user.yml
+
+# SO
+.DS_Store
+
+# ML: venv local e checkpoints do Jupyter (nao precisam ser versionados).
+# ml/data/ (cache do dataset extraido do Athena) e ml/results/ SAO
+# versionados de proposito - o sandbox AWS Academy expira a sessao com
+# frequencia, entao ter o parquet já no repo evita depender do Athena
+# so para abrir o notebook.
+ml/.venv/
+ml/.ipynb_checkpoints/
+**/.ipynb_checkpoints/
+
+latex/

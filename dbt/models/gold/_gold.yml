@@ -1,0 +1,56 @@
+version: 2
+
+models:
+  - name: gold_subject_activity_summary
+    description: >
+      Camada Gold: uma linha por combinacao subject_id x activity_label, com
+      contagem de janelas, participacao percentual da atividade na sessao do
+      sujeito e media/desvio padrao dos 6 canais (acelerometro e giroscopio,
+      3 eixos cada) e das magnitudes do vetor de medias. Base de todos os
+      demais modelos gold e do dashboard de comparacao entre
+      sujeitos/atividades.
+    columns:
+      - name: subject_activity_uid
+        description: Chave substituta unica (subject_id || '_' || activity_label).
+        data_tests:
+          - unique
+          - not_null
+      - name: subject_id
+        description: Identificador do sujeito (ex. "1600").
+        data_tests:
+          - not_null
+      - name: activity_label
+        description: Atividade (codigo de uma letra, A-S exceto N).
+        data_tests:
+          - not_null
+          - accepted_values:
+              values: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'O', 'P', 'Q', 'R', 'S']
+      - name: n_windows
+        description: Quantidade de janelas de 10s do sujeito nessa atividade.
+        data_tests:
+          - not_null
+      - name: share_of_subject_windows
+        description: >
+          Fracao (0 a 1) das janelas validas do sujeito que pertencem a
+          esta atividade.
+        data_tests:
+          - not_null
+
+  - name: gold_activity_benchmark
+    description: >
+      Camada Gold: benchmark populacional por atividade (grao = activity_label),
+      agregando o `gold_subject_activity_summary` entre todos os sujeitos.
+      Usado como referencia no dashboard e como baseline de normalizacao no
+      treinamento/avaliacao do modelo de ML.
+    columns:
+      - name: activity_label
+        description: Atividade (codigo de uma letra, A-S exceto N).
+        data_tests:
+          - unique
+          - not_null
+          - accepted_values:
+              values: ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'O', 'P', 'Q', 'R', 'S']
+      - name: n_subjects
+        description: Quantidade de sujeitos distintos com janelas nessa atividade.
+        data_tests:
+          - not_null

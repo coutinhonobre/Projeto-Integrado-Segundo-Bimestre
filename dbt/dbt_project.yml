@@ -1,0 +1,21 @@
+name: 'projeto_integrado_wisdm_silver'
+version: '1.0.0'
+config-version: 2
+
+profile: 'projeto_integrado_wisdm_silver'
+
+model-paths: ["models"]
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+models:
+  projeto_integrado_wisdm_silver:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
+    gold:
+      +materialized: table
+      +schema: "{{ env_var('GOLD_GLUE_DATABASE_NAME', 'projeto_integrado_wisdm_gold') }}"
