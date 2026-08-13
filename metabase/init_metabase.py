@@ -71,17 +71,35 @@ def athena_details():
     return details
 
 
-def existing_database_names(session):
+def existing_database_id(session):
     status, resp = request("GET", "/api/database", session=session)
     if status >= 300 or resp is None:
-        return set()
+        return None
     rows = resp.get("data", resp) if isinstance(resp, dict) else resp
-    return {row["name"] for row in rows}
+    for row in rows:
+        if row["name"] == DATABASE_NAME:
+            return row["id"]
+    return None
 
 
 def ensure_database(session):
-    if DATABASE_NAME in existing_database_names(session):
-        print(f"Conexao '{DATABASE_NAME}' ja existe, nada a fazer.")
+    # As credenciais da AWS Academy Learner Lab sao temporarias e expiram
+    # (Athena passa a rejeitar com "security token included in the request
+    # is expired"). Por isso, mesmo que a conexao ja exista, atualizamos os
+    # `details` a cada boot para refletir o AWS_SESSION_TOKEN atual do .env -
+    # criar so na primeira vez deixaria o Metabase preso num token vencido.
+    database_id = existing_database_id(session)
+    if database_id is not None:
+        status, resp = request(
+            "PUT",
+            f"/api/database/{database_id}",
+            {"details": athena_details()},
+            session=session,
+        )
+        if status >= 300:
+            print(f"AVISO: nao consegui atualizar as credenciais da conexao Athena (status {status}): {resp}")
+        else:
+            print(f"Conexao '{DATABASE_NAME}' ja existia, credenciais atualizadas.")
         return
     status, resp = request(
         "POST",
